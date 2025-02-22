@@ -91,7 +91,7 @@ public class GraphTests {
     }
 
     @Test
-    void graphConnectionRemoval_Unsafe_Triangle(){
+    void graphConnectionRemoval_NoSplit_Triangle(){
         GraphNode<String> nodeA = new GraphNode<>("A");
         Graph<String, LinkType> graph = new Graph<>(nodeA);
 
@@ -161,6 +161,117 @@ public class GraphTests {
                 nodeD, Set.of(new GraphLink<>(nodeC, LinkType.TYPE_1))
         );
         assertEquals(newGraph.get().getAdjacencies(), correctStructure2);
+    }
+
+    @Test
+    void graphNodeRemoval_NoSplit_SingleNode(){
+        GraphNode<String> nodeA = new GraphNode<>("A");
+        Graph<String, LinkType> graph = new Graph<>(nodeA);
+
+        var newGraphs = graph.removeNodeAndSplit(nodeA);
+        assertFalse(newGraphs.isEmpty());
+
+        Map<GraphNode<String>, Set<GraphLink<String, LinkType>>> correctStructure = Map.of();
+        assertEquals(graph.getAdjacencies(), correctStructure);
+
+        assertFalse(graph.canExist());
+    }
+
+    @Test
+    void graphNodeRemoval_NoSplit_TwoNodes(){
+        GraphNode<String> nodeA = new GraphNode<>("A");
+        Graph<String, LinkType> graph = new Graph<>(nodeA);
+
+        GraphNode<String> nodeB = new GraphNode<>("B");
+
+        assertTrue(graph.addNode(nodeB, nodeA, LinkType.TYPE_1));
+
+        var newGraphs = graph.removeNodeAndSplit(nodeA);
+        assertFalse(newGraphs.isEmpty());
+        assertEquals(newGraphs.get(), Set.of());
+
+        Map<GraphNode<String>, Set<GraphLink<String, LinkType>>> correctStructure = Map.of(nodeB, Set.of());
+        assertEquals(graph.getAdjacencies(), correctStructure);
+
+        assertTrue(graph.canExist());
+    }
+
+    @Test
+    void graphNodeRemoval_Split_ThreeNodes(){
+        GraphNode<String> nodeA = new GraphNode<>("A");
+        Graph<String, LinkType> graph = new Graph<>(nodeA);
+
+        GraphNode<String> nodeB = new GraphNode<>("B");
+        GraphNode<String> nodeC = new GraphNode<>("C");
+
+        assertTrue(graph.addNode(nodeB, nodeA, LinkType.TYPE_1));
+        assertTrue(graph.addNode(nodeC, nodeB, LinkType.TYPE_2));
+
+        var _newGraphs = graph.removeNodeAndSplit(nodeB);
+        assertFalse(_newGraphs.isEmpty());
+
+        var newGraphs = _newGraphs.get();
+        assertEquals(1, newGraphs.size());
+
+        var structures = Set.of(
+                newGraphs.stream().findFirst().get().getAdjacencies(),
+                graph.getAdjacencies()
+        );
+
+        var correctStructures = Set.of(
+                Map.of(nodeA, Set.of()),
+                Map.of(nodeC, Set.of())
+        );
+
+        assertEquals(correctStructures, structures);
+    }
+
+    @Test
+    void graphNodeRemoval_Split_FiveNodes(){
+        /*
+        * From:
+        *      D-E
+        *    /
+        * A-B-C
+        *
+        * To:
+        * A, C, D-E
+        */
+        GraphNode<String> nodeA = new GraphNode<>("A");
+        Graph<String, LinkType> graph = new Graph<>(nodeA);
+
+        GraphNode<String> nodeB = new GraphNode<>("B");
+        GraphNode<String> nodeC = new GraphNode<>("C");
+        GraphNode<String> nodeD = new GraphNode<>("D");
+        GraphNode<String> nodeE = new GraphNode<>("E");
+
+        assertTrue(graph.addNode(nodeB, nodeA, LinkType.TYPE_1));
+        assertTrue(graph.addNode(nodeC, nodeB, LinkType.TYPE_1));
+        assertTrue(graph.addNode(nodeD, nodeB, LinkType.TYPE_1));
+        assertTrue(graph.addNode(nodeE, nodeD, LinkType.TYPE_1));
+
+        var _newGraphs = graph.removeNodeAndSplit(nodeB);
+        assertFalse(_newGraphs.isEmpty());
+
+        var newGraphs = _newGraphs.get().stream().toList();
+        assertEquals(2, newGraphs.size());
+
+        var structures = Set.of(
+                newGraphs.get(0).getAdjacencies(),
+                newGraphs.get(1).getAdjacencies(),
+                graph.getAdjacencies()
+        );
+
+        var correctStructures = Set.of(
+                Map.of(nodeA, Set.of()),
+                Map.of(nodeC, Set.of()),
+                Map.of(
+                        nodeD, Set.of(new GraphLink<>(nodeE, LinkType.TYPE_1)),
+                        nodeE, Set.of(new GraphLink<>(nodeD, LinkType.TYPE_1))
+                )
+        );
+
+        assertEquals(correctStructures, structures);
     }
 
     public enum LinkType {

@@ -104,6 +104,66 @@ public class Graph<NodeType, LinkType> {
         return Optional.of(newGraph);
     }
 
+    private boolean removeNode_unsafe(GraphNode<NodeType> node){
+        if(!adjacencyList.containsKey(node))
+            return false;
+
+        var connectedTo = adjacencyList.get(node);
+        adjacencyList.remove(node);
+
+        connectedTo.forEach(link -> {
+//            adjacencyList.get(link.node()).remove(new GraphLink<>(link.node(), link.type()));
+            adjacencyList.put(
+                    link.node(),
+                    adjacencyList.get(link.node()).stream()
+                            .filter(_link -> _link.node() != node)
+                            .collect(Collectors.toCollection(HashSet::new))
+            );
+        });
+
+        return true;
+    }
+
+    public Optional<Set<Graph<NodeType, LinkType>>> removeNodeAndSplit(GraphNode<NodeType> node){
+        if(!adjacencyList.containsKey(node))
+            return Optional.empty();
+
+        var danglingNodes = adjacencyList.get(node).stream().map(GraphLink::node).collect(Collectors.toSet());
+        removeNode_unsafe(node);
+
+        if(danglingNodes.isEmpty())
+            return Optional.of(Set.of());
+
+        var thisGraphSeed = danglingNodes.stream().findFirst().get();
+        var currentGraphNodes = getConnectedNodes(thisGraphSeed);
+
+        danglingNodes.removeAll(currentGraphNodes);
+
+        HashSet<Graph<NodeType, LinkType>> newGraphs = new HashSet<>();
+
+        // Combine dangling nodes to graphs
+        while(!danglingNodes.isEmpty()){
+            var newGraphSeed = danglingNodes.stream().findFirst().get();
+            danglingNodes.remove(newGraphSeed);
+
+            var newGraphNodes = getConnectedNodes(newGraphSeed);
+
+            Graph<NodeType, LinkType> newGraph = new Graph<>();
+            adjacencyList.forEach((key, value) -> {
+                if(newGraphNodes.contains(key))
+                    newGraph.adjacencyList.put(key, value);
+            });
+
+            newGraphs.add(newGraph);
+
+            danglingNodes.removeAll(newGraphNodes);
+
+            newGraphNodes.forEach(adjacencyList::remove);
+        }
+
+        return Optional.of(newGraphs);
+    }
+
     public Set<GraphNode<NodeType>> getConnectedNodes(GraphNode<NodeType> node){
         if(!adjacencyList.containsKey(node))
             return Set.of();
@@ -131,6 +191,10 @@ public class Graph<NodeType, LinkType> {
         }
 
         return visitedNodes;
+    }
+
+    public boolean canExist(){
+        return !adjacencyList.isEmpty();
     }
 
     public void printAdjacencies(){
