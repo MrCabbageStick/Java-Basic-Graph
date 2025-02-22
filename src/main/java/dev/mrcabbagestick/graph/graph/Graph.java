@@ -164,6 +164,18 @@ public class Graph<NodeType, LinkType> {
         return Optional.of(newGraphs);
     }
 
+    public void mergeWith(GraphNode<NodeType> thisGraphNode, Graph<NodeType, LinkType> otherGraph, GraphNode<NodeType> otherGraphNode, LinkType linkType){
+        if(!adjacencyList.containsKey(thisGraphNode) || !otherGraph.adjacencyList.containsKey(otherGraphNode))
+            return;
+
+        adjacencyList.get(thisGraphNode).add(new GraphLink<>(otherGraphNode, linkType));
+        otherGraph.adjacencyList.get(otherGraphNode).add(new GraphLink<>(thisGraphNode, linkType));
+
+        adjacencyList.putAll(otherGraph.adjacencyList);
+
+        otherGraph.adjacencyList.clear();
+    }
+
     public Set<GraphNode<NodeType>> getConnectedNodes(GraphNode<NodeType> node){
         if(!adjacencyList.containsKey(node))
             return Set.of();

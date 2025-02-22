@@ -274,6 +274,56 @@ public class GraphTests {
         assertEquals(correctStructures, structures);
     }
 
+    @Test
+    void graphMerge_OneAndOne(){
+        GraphNode<String> nodeA = new GraphNode<>("A");
+        Graph<String, LinkType> graph1 = new Graph<>(nodeA);
+
+        GraphNode<String> nodeX = new GraphNode<>("X");
+        Graph<String, LinkType> graph2 = new Graph<>(nodeX);
+
+        graph1.mergeWith(nodeA, graph2, nodeX, LinkType.TYPE_1);
+
+        assertEquals(Map.of(), graph2.getAdjacencies());
+
+        var correctGraph1Structure = Map.of(
+                nodeA, Set.of(new GraphLink<>(nodeX, LinkType.TYPE_1)),
+                nodeX, Set.of(new GraphLink<>(nodeA, LinkType.TYPE_1))
+        );
+        assertEquals(correctGraph1Structure, graph1.getAdjacencies());
+    }
+
+    @Test
+    void graphMerge_1And3(){
+        GraphNode<String> nodeA = new GraphNode<>("A");
+        Graph<String, LinkType> graph1 = new Graph<>(nodeA);
+
+        GraphNode<String> nodeX = new GraphNode<>("X");
+        GraphNode<String> nodeY = new GraphNode<>("Y");
+        GraphNode<String> nodeZ = new GraphNode<>("Z");
+        Graph<String, LinkType> graph2 = new Graph<>(nodeX);
+
+        graph2.addNode(nodeY, nodeX, LinkType.TYPE_1);
+        graph2.addNode(nodeZ, nodeX, LinkType.TYPE_1);
+
+        graph1.mergeWith(nodeA, graph2, nodeX, LinkType.TYPE_1);
+
+        assertEquals(Map.of(), graph2.getAdjacencies());
+
+        var correctGraph1Structure = Map.of(
+                nodeA, Set.of(new GraphLink<>(nodeX, LinkType.TYPE_1)),
+                nodeX, Set.of(
+                        new GraphLink<>(nodeA, LinkType.TYPE_1),
+                        new GraphLink<>(nodeY, LinkType.TYPE_1),
+                        new GraphLink<>(nodeZ, LinkType.TYPE_1)
+                ),
+                nodeY, Set.of(new GraphLink<>(nodeX, LinkType.TYPE_1)),
+                nodeZ, Set.of(new GraphLink<>(nodeX, LinkType.TYPE_1))
+        );
+
+        assertEquals(correctGraph1Structure, graph1.getAdjacencies());
+    }
+
     public enum LinkType {
         TYPE_1,
         TYPE_2,
