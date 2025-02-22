@@ -13,9 +13,9 @@ public class GraphTests {
     @Test
     void graphCreation_OneNode(){
         GraphNode<String> nodeA = new GraphNode<>("A");
-        Graph<String> graph = new Graph<>(nodeA);
+        Graph<String, LinkType> graph = new Graph<>(nodeA);
 
-        Map<GraphNode<String>, Set<GraphLink<String>>> correctStructure = Map.of(
+        Map<GraphNode<String>, Set<GraphLink<String, LinkType>>> correctStructure = Map.of(
             nodeA, Set.of()
         );
 
@@ -25,10 +25,10 @@ public class GraphTests {
     @Test
     void graphNodeAddition_RepeatedNode(){
         GraphNode<String> nodeA = new GraphNode<>("A");
-        Graph<String> graph = new Graph<>(nodeA);
+        Graph<String, LinkType> graph = new Graph<>(nodeA);
 
         assertFalse(graph.addNode(nodeA, nodeA, LinkType.TYPE_1));
-        Map<GraphNode<String>, Set<GraphLink<String>>> correctStructure = Map.of(
+        Map<GraphNode<String>, Set<GraphLink<String, LinkType>>> correctStructure = Map.of(
                 nodeA, Set.of()
         );
 
@@ -38,13 +38,13 @@ public class GraphTests {
     @Test
     void graphNodeAddition_NewNode(){
         GraphNode<String> nodeA = new GraphNode<>("A");
-        Graph<String> graph = new Graph<>(nodeA);
+        Graph<String, LinkType> graph = new Graph<>(nodeA);
 
         GraphNode<String> nodeB = new GraphNode<>("B");
 
        assertTrue(graph.addNode(nodeB, nodeA, LinkType.TYPE_1));
 
-        Map<GraphNode<String>, Set<GraphLink<String>>> correctStructure = Map.of(
+        Map<GraphNode<String>, Set<GraphLink<String, LinkType>>> correctStructure = Map.of(
                 nodeA, Set.of(new GraphLink<>(nodeB, LinkType.TYPE_1)),
                 nodeB, Set.of(new GraphLink<>(nodeA, LinkType.TYPE_1))
         );
@@ -55,7 +55,7 @@ public class GraphTests {
     @Test
     void graphLinkAddition_Triangle(){
         GraphNode<String> nodeA = new GraphNode<>("A");
-        Graph<String> graph = new Graph<>(nodeA);
+        Graph<String, LinkType> graph = new Graph<>(nodeA);
 
         GraphNode<String> nodeB = new GraphNode<>("B");
         GraphNode<String> nodeC = new GraphNode<>("C");
@@ -64,7 +64,7 @@ public class GraphTests {
         assertTrue(graph.addNode(nodeC, nodeB, LinkType.TYPE_2));
         assertTrue(graph.addLink(nodeC, nodeA, LinkType.TYPE_3));
 
-        Map<GraphNode<String>, Set<GraphLink<String>>> correctStructure = Map.of(
+        Map<GraphNode<String>, Set<GraphLink<String, LinkType>>> correctStructure = Map.of(
                 nodeA, Set.of(new GraphLink<>(nodeB, LinkType.TYPE_1), new GraphLink<>(nodeC, LinkType.TYPE_3)),
                 nodeB, Set.of(new GraphLink<>(nodeA, LinkType.TYPE_1), new GraphLink<>(nodeC, LinkType.TYPE_2)),
                 nodeC, Set.of(new GraphLink<>(nodeA, LinkType.TYPE_3), new GraphLink<>(nodeB, LinkType.TYPE_2))
@@ -76,7 +76,7 @@ public class GraphTests {
     @Test
     void graph_ConnectedNodes(){
         GraphNode<String> nodeA = new GraphNode<>("A");
-        Graph<String> graph = new Graph<>(nodeA);
+        Graph<String, LinkType> graph = new Graph<>(nodeA);
 
         GraphNode<String> nodeB = new GraphNode<>("B");
         GraphNode<String> nodeC = new GraphNode<>("C");
@@ -93,7 +93,7 @@ public class GraphTests {
     @Test
     void graphConnectionRemoval_Unsafe_Triangle(){
         GraphNode<String> nodeA = new GraphNode<>("A");
-        Graph<String> graph = new Graph<>(nodeA);
+        Graph<String, LinkType> graph = new Graph<>(nodeA);
 
         GraphNode<String> nodeB = new GraphNode<>("B");
         GraphNode<String> nodeC = new GraphNode<>("C");
@@ -106,7 +106,7 @@ public class GraphTests {
 
         assertEquals(secondGraph, Optional.empty());
 
-        Map<GraphNode<String>, Set<GraphLink<String>>> correctStructure = Map.of(
+        Map<GraphNode<String>, Set<GraphLink<String, LinkType>>> correctStructure = Map.of(
                 nodeA, Set.of(new GraphLink<>(nodeC, LinkType.TYPE_3)),
                 nodeB, Set.of(new GraphLink<>(nodeC, LinkType.TYPE_2)),
                 nodeC, Set.of(new GraphLink<>(nodeA, LinkType.TYPE_3), new GraphLink<>(nodeB, LinkType.TYPE_2))
@@ -118,7 +118,7 @@ public class GraphTests {
     @Test
     void graphConnectionRemoval_Split_TwoNodes(){
         GraphNode<String> nodeA = new GraphNode<>("A");
-        Graph<String> graph = new Graph<>(nodeA);
+        Graph<String, LinkType> graph = new Graph<>(nodeA);
 
         GraphNode<String> nodeB = new GraphNode<>("B");
 
@@ -127,17 +127,17 @@ public class GraphTests {
         var newGraph = graph.removeConnectionAndSplit(nodeA, nodeB);
         assertFalse(newGraph.isEmpty());
 
-        Map<GraphNode<String>, Set<GraphLink<String>>> correctStructure1 = Map.of(nodeA, Set.of());
+        Map<GraphNode<String>, Set<GraphLink<String, LinkType>>> correctStructure1 = Map.of(nodeA, Set.of());
         assertEquals(graph.getAdjacencies(), correctStructure1);
 
-        Map<GraphNode<String>, Set<GraphLink<String>>> correctStructure2 = Map.of(nodeB, Set.of());
+        Map<GraphNode<String>, Set<GraphLink<String, LinkType>>> correctStructure2 = Map.of(nodeB, Set.of());
         assertEquals(newGraph.get().getAdjacencies(), correctStructure2);
     }
 
     @Test
     void graphConnectionRemoval_Split_FourNodes(){
         GraphNode<String> nodeA = new GraphNode<>("A");
-        Graph<String> graph = new Graph<>(nodeA);
+        Graph<String, LinkType> graph = new Graph<>(nodeA);
 
         GraphNode<String> nodeB = new GraphNode<>("B");
         GraphNode<String> nodeC = new GraphNode<>("C");
@@ -150,16 +150,22 @@ public class GraphTests {
         var newGraph = graph.removeConnectionAndSplit(nodeB, nodeC);
         assertFalse(newGraph.isEmpty());
 
-        Map<GraphNode<String>, Set<GraphLink<String>>> correctStructure1 = Map.of(
+        Map<GraphNode<String>, Set<GraphLink<String, LinkType>>> correctStructure1 = Map.of(
                 nodeA, Set.of(new GraphLink<>(nodeB, LinkType.TYPE_1)),
                 nodeB, Set.of(new GraphLink<>(nodeA, LinkType.TYPE_1))
         );
         assertEquals(graph.getAdjacencies(), correctStructure1);
 
-        Map<GraphNode<String>, Set<GraphLink<String>>> correctStructure2 = Map.of(
+        Map<GraphNode<String>, Set<GraphLink<String, LinkType>>> correctStructure2 = Map.of(
                 nodeC, Set.of(new GraphLink<>(nodeD, LinkType.TYPE_1)),
                 nodeD, Set.of(new GraphLink<>(nodeC, LinkType.TYPE_1))
         );
         assertEquals(newGraph.get().getAdjacencies(), correctStructure2);
+    }
+
+    public enum LinkType {
+        TYPE_1,
+        TYPE_2,
+        TYPE_3
     }
 }

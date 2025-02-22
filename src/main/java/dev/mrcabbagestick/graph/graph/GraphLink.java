@@ -1,3 +1,3 @@
 package dev.mrcabbagestick.graph.graph;
 
-public record GraphLink<T>(GraphNode<T> node, LinkType type){}
+public record GraphLink<NodeType, LinkType>(GraphNode<NodeType> node, LinkType type){}

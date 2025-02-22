@@ -5,10 +5,10 @@ import java.util.stream.Collectors;
 
 import static java.util.HashSet.newHashSet;
 
-public class Graph<T> {
-    private final Map<GraphNode<T>, HashSet<GraphLink<T>>> adjacencyList = new HashMap<>();
+public class Graph<NodeType, LinkType> {
+    private final Map<GraphNode<NodeType>, HashSet<GraphLink<NodeType, LinkType>>> adjacencyList = new HashMap<>();
 
-    public Graph(GraphNode<T> firstNode){
+    public Graph(GraphNode<NodeType> firstNode){
         adjacencyList.put(firstNode, newHashSet(0));
     }
 
@@ -18,14 +18,14 @@ public class Graph<T> {
 //        adjacencyList.put(node, newHashSet(0));
 //    }
 
-    public boolean addNode(GraphNode<T> node, GraphNode<T> connectedTo, LinkType linkType){
+    public boolean addNode(GraphNode<NodeType> node, GraphNode<NodeType> connectedTo, LinkType linkType){
         var allNodes = adjacencyList.keySet();
 
         if(allNodes.contains(node) || !allNodes.contains(connectedTo)){
             return false;
         }
 
-        HashSet<GraphLink<T>> connectionSet = HashSet.newHashSet(0);
+        HashSet<GraphLink<NodeType, LinkType>> connectionSet = HashSet.newHashSet(0);
         connectionSet.add(new GraphLink<>(connectedTo, linkType));
         adjacencyList.put(node, connectionSet);
 
@@ -34,7 +34,7 @@ public class Graph<T> {
         return true;
     }
 
-    public boolean addLink(GraphNode<T> node1, GraphNode<T> node2, LinkType linkType){
+    public boolean addLink(GraphNode<NodeType> node1, GraphNode<NodeType> node2, LinkType linkType){
         var allNodes = adjacencyList.keySet();
 
         if(!allNodes.contains(node1) || !allNodes.contains(node2)){
@@ -47,11 +47,11 @@ public class Graph<T> {
         return true;
     }
 
-    public Map<GraphNode<T>, Set<GraphLink<T>>> getAdjacencies(){
+    public Map<GraphNode<NodeType>, Set<GraphLink<NodeType, LinkType>>> getAdjacencies(){
         return Map.copyOf(adjacencyList);
     }
 
-    private boolean removeConnection_unsafe(GraphNode<T> node1, GraphNode<T> node2){
+    private boolean removeConnection_unsafe(GraphNode<NodeType> node1, GraphNode<NodeType> node2){
         var allNodes = adjacencyList.keySet();
 
         if(!allNodes.contains(node1) || !allNodes.contains(node2))
@@ -73,7 +73,7 @@ public class Graph<T> {
         return true;
     }
 
-    public Optional<Graph<T>> removeConnectionAndSplit(GraphNode<T> node1, GraphNode<T> node2){
+    public Optional<Graph<NodeType, LinkType>> removeConnectionAndSplit(GraphNode<NodeType> node1, GraphNode<NodeType> node2){
         boolean nodesDisconnected = removeConnection_unsafe(node1, node2);
 
         // Nodes not in network
@@ -86,9 +86,9 @@ public class Graph<T> {
         if(connectedToNode1.contains(node2))
             return Optional.empty();
 
-        Graph<T> newGraph = new Graph<>();
+        Graph<NodeType, LinkType> newGraph = new Graph<>();
 
-        HashSet<GraphNode<T>> connectedToNode2 = new HashSet<>(adjacencyList.size() - connectedToNode1.size());
+        HashSet<GraphNode<NodeType>> connectedToNode2 = new HashSet<>(adjacencyList.size() - connectedToNode1.size());
 
         // Populate new graph
         adjacencyList.forEach((key, value) -> {
@@ -104,19 +104,19 @@ public class Graph<T> {
         return Optional.of(newGraph);
     }
 
-    public Set<GraphNode<T>> getConnectedNodes(GraphNode<T> node){
+    public Set<GraphNode<NodeType>> getConnectedNodes(GraphNode<NodeType> node){
         if(!adjacencyList.containsKey(node))
             return Set.of();
 
-        Map<GraphNode<T>, Set<GraphNode<T>>> adjacentNodes = new HashMap<>(adjacencyList.size());
+        Map<GraphNode<NodeType>, Set<GraphNode<NodeType>>> adjacentNodes = new HashMap<>(adjacencyList.size());
 
         adjacencyList.forEach((key, value) -> {
             var nodeSet = value.stream().map(GraphLink::node).collect(Collectors.toSet());
             adjacentNodes.put(key, nodeSet);
         });
 
-        HashSet<GraphNode<T>> visitedNodes = new HashSet<>();
-        Stack<GraphNode<T>> nodesToVisit = new Stack<>();
+        HashSet<GraphNode<NodeType>> visitedNodes = new HashSet<>();
+        Stack<GraphNode<NodeType>> nodesToVisit = new Stack<>();
 
         nodesToVisit.push(node);
 
