@@ -19,7 +19,7 @@ public class GraphTests {
             nodeA, Set.of()
         );
 
-        assertEquals(graph.getAdjacencies(), correctStructure);
+        assertEquals(correctStructure, graph.getAdjacencies());
     }
 
     @Test
@@ -32,7 +32,7 @@ public class GraphTests {
                 nodeA, Set.of()
         );
 
-        assertEquals(graph.getAdjacencies(), correctStructure);
+        assertEquals(correctStructure, graph.getAdjacencies());
     }
 
     @Test
@@ -49,7 +49,7 @@ public class GraphTests {
                 nodeB, Set.of(new GraphLink<>(nodeA, LinkType.TYPE_1))
         );
 
-        assertEquals(graph.getAdjacencies(), correctStructure);
+        assertEquals(correctStructure, graph.getAdjacencies());
     }
 
     @Test
@@ -70,7 +70,7 @@ public class GraphTests {
                 nodeC, Set.of(new GraphLink<>(nodeA, LinkType.TYPE_3), new GraphLink<>(nodeB, LinkType.TYPE_2))
         );
 
-        assertEquals(graph.getAdjacencies(), correctStructure);
+        assertEquals(correctStructure, graph.getAdjacencies());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class GraphTests {
 
         var connectedNodes = graph.getConnectedNodes(nodeA);
 
-        assertEquals(connectedNodes, Set.of(nodeA, nodeB, nodeC));
+        assertEquals(Set.of(nodeA, nodeB, nodeC), connectedNodes);
     }
 
     @Test
@@ -112,7 +112,7 @@ public class GraphTests {
                 nodeC, Set.of(new GraphLink<>(nodeA, LinkType.TYPE_3), new GraphLink<>(nodeB, LinkType.TYPE_2))
         );
 
-        assertEquals(graph.getAdjacencies(), correctStructure);
+        assertEquals(correctStructure, graph.getAdjacencies());
     }
 
     @Test
@@ -128,10 +128,10 @@ public class GraphTests {
         assertFalse(newGraph.isEmpty());
 
         Map<GraphNode<String>, Set<GraphLink<String, LinkType>>> correctStructure1 = Map.of(nodeA, Set.of());
-        assertEquals(graph.getAdjacencies(), correctStructure1);
+        assertEquals(correctStructure1, graph.getAdjacencies());
 
         Map<GraphNode<String>, Set<GraphLink<String, LinkType>>> correctStructure2 = Map.of(nodeB, Set.of());
-        assertEquals(newGraph.get().getAdjacencies(), correctStructure2);
+        assertEquals(correctStructure2, newGraph.get().getAdjacencies());
     }
 
     @Test
@@ -154,13 +154,13 @@ public class GraphTests {
                 nodeA, Set.of(new GraphLink<>(nodeB, LinkType.TYPE_1)),
                 nodeB, Set.of(new GraphLink<>(nodeA, LinkType.TYPE_1))
         );
-        assertEquals(graph.getAdjacencies(), correctStructure1);
+        assertEquals(correctStructure1, graph.getAdjacencies());
 
         Map<GraphNode<String>, Set<GraphLink<String, LinkType>>> correctStructure2 = Map.of(
                 nodeC, Set.of(new GraphLink<>(nodeD, LinkType.TYPE_1)),
                 nodeD, Set.of(new GraphLink<>(nodeC, LinkType.TYPE_1))
         );
-        assertEquals(newGraph.get().getAdjacencies(), correctStructure2);
+        assertEquals(correctStructure2, newGraph.get().getAdjacencies());
     }
 
     @Test
@@ -172,7 +172,7 @@ public class GraphTests {
         assertFalse(newGraphs.isEmpty());
 
         Map<GraphNode<String>, Set<GraphLink<String, LinkType>>> correctStructure = Map.of();
-        assertEquals(graph.getAdjacencies(), correctStructure);
+        assertEquals(correctStructure, graph.getAdjacencies());
 
         assertFalse(graph.canExist());
     }
@@ -188,10 +188,10 @@ public class GraphTests {
 
         var newGraphs = graph.removeNodeAndSplit(nodeA);
         assertFalse(newGraphs.isEmpty());
-        assertEquals(newGraphs.get(), Set.of());
+        assertEquals(Set.of(), newGraphs.get());
 
         Map<GraphNode<String>, Set<GraphLink<String, LinkType>>> correctStructure = Map.of(nodeB, Set.of());
-        assertEquals(graph.getAdjacencies(), correctStructure);
+        assertEquals(correctStructure, graph.getAdjacencies());
 
         assertTrue(graph.canExist());
     }
